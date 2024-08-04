@@ -18,19 +18,21 @@ import SignUp from "@/pages/SignUp";
 import UserProfile from "@/pages/UserProfile";
 
 export enum Routes {
-  ROOT = "/",
-  RESOURCES = "/resources",
-  INBOX = "/inbox",
-  ARCHIVED = "/archived",
-  SETTING = "/setting",
-  EXPLORE = "/explore",
-  ABOUT = "/about",
-  AUTH = "/auth",
+  ROOT = "",
+  RESOURCES = "resources",
+  INBOX = "inbox",
+  ARCHIVED = "archived",
+  SETTING = "setting",
+  EXPLORE = "explore",
+  ABOUT = "about",
+  AUTH = "auth",
+
+  PREFIX = "/memos/",
 }
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "",
     element: <App />,
     children: [
       {
@@ -107,6 +109,8 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
+], {
+  basename: Routes.PREFIX,
+});
 
 export default router;

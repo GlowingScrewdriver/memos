@@ -43,7 +43,7 @@ func (*FrontendService) Serve(_ context.Context, e *echo.Echo) {
 	}))
 	// Use echo gzip middleware to compress the response.
 	// Reference: https://echo.labstack.com/docs/middleware/gzip
-	e.Group("assets").Use(middleware.GzipWithConfig(middleware.GzipConfig{
+	e.Group("memos/assets").Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,
 	}), func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
