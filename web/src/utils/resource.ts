@@ -1,11 +1,12 @@
 import { Resource } from "@/types/proto/api/v1/resource_service";
+import { Routes } from "@/router";
 
 export const getResourceUrl = (resource: Resource) => {
   if (resource.externalLink) {
     return resource.externalLink;
   }
 
-  return `${window.location.origin}/file/${resource.name}/${resource.filename}`;
+  return `${window.location.origin}${Routes.PREFIX}/file/${resource.name}/${resource.filename}`;
 };
 
 export const getResourceType = (resource: Resource) => {

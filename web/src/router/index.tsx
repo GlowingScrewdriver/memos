@@ -27,7 +27,7 @@ export enum Routes {
   ABOUT = "about",
   AUTH = "auth",
 
-  PREFIX = "/memos/",
+  PREFIX = "/memos",
 }
 
 const router = createBrowserRouter([

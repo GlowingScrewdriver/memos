@@ -105,7 +105,7 @@ func (s *APIV1Service) RegisterGateway(ctx context.Context, echoServer *echo.Ech
 	if err := v1pb.RegisterIdentityProviderServiceHandler(ctx, gwMux, conn); err != nil {
 		return err
 	}
-	gwGroup := echoServer.Group("")
+	gwGroup := echoServer.Group("/memos")
 	gwGroup.Use(middleware.CORS())
 	handler := echo.WrapHandler(gwMux)
 
