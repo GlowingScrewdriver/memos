@@ -2,6 +2,31 @@
 
 A privacy-first, lightweight note-taking service. Easily capture and share your great thoughts.
 
+-------
+## About this fork
+This fork attempts to allow Memos to run under a subpath of the server (e.g.
+`http://example.com/memos` instead of `http://example.com`. The motive behind this effort
+is to be able to run Memos behind a reverse proxy that dispatches based on path prefix.
+
+At present, this fork of Memos runs from `/memos`; API calls, however, are still made to
+`/memos.api.*`.
+
+### My Nginx reverse proxy configuration
+```
+http {
+    server {
+        # Memos
+        location /memos/ {
+                proxy_pass http://127.0.0.1:8085/memos/;
+        }
+        location ~ ^/memos\.api.+/ {
+                proxy_pass http://127.0.0.1:8085;
+        }
+    }
+}
+```
+---------
+
 <a href="https://www.usememos.com">Home Page</a> •
 <a href="https://www.usememos.com/blog">Blogs</a> •
 <a href="https://www.usememos.com/docs">Docs</a> •
