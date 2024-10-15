@@ -1,10 +1,9 @@
 import { Dropdown, IconButton, Menu, MenuButton } from "@mui/joy";
-import { useEffect, useRef, useState } from "react";
+import { HashIcon } from "lucide-react";
+import { useRef, useState } from "react";
 import useClickAway from "react-use/lib/useClickAway";
-import Icon from "@/components/Icon";
 import OverflowTip from "@/components/kit/OverflowTip";
-import useCurrentUser from "@/hooks/useCurrentUser";
-import { useTagStore } from "@/store/v1";
+import { useMemoTagList } from "@/store/v1";
 import { useTranslate } from "@/utils/i18n";
 import { EditorRefActions } from "../Editor";
 
@@ -15,21 +14,12 @@ interface Props {
 const TagSelector = (props: Props) => {
   const t = useTranslate();
   const { editorRef } = props;
-  const tagStore = useTagStore();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const tags = tagStore.sortedTags();
-  const user = useCurrentUser();
-
-  useEffect(() => {
-    (async () => {
-      try {
-        await tagStore.fetchTags({ user });
-      } catch (error) {
-        // do nothing.
-      }
-    })();
-  }, []);
+  const tags = Object.entries(useMemoTagList())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .sort((a, b) => b[1] - a[1])
+    .map(([tag]) => tag);
 
   useClickAway(containerRef, () => {
     setOpen(false);
@@ -58,7 +48,7 @@ const TagSelector = (props: Props) => {
           },
         }}
       >
-        <Icon.Hash className="w-5 h-5 mx-auto" />
+        <HashIcon className="w-5 h-5 mx-auto" />
       </MenuButton>
       <Menu className="relative text-sm" component="div" size="sm" placement="bottom-start">
         <div ref={containerRef}>

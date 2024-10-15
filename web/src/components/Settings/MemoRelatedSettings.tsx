@@ -1,10 +1,15 @@
-import { Button, Input, Switch } from "@mui/joy";
-import { isEqual } from "lodash-es";
+import { Button, Input, Switch, Select, Option, Chip, ChipDelete } from "@mui/joy";
+import { isEqual, uniq } from "lodash-es";
+import { CheckIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 import { workspaceSettingNamePrefix, useWorkspaceSettingStore } from "@/store/v1";
+import { Visibility } from "@/types/proto/api/v1/memo_service";
 import { WorkspaceMemoRelatedSetting } from "@/types/proto/api/v1/workspace_setting_service";
 import { WorkspaceSettingKey } from "@/types/proto/store/workspace_setting";
 import { useTranslate } from "@/utils/i18n";
+import { convertVisibilityFromString, convertVisibilityToString } from "@/utils/memo";
+import VisibilityIcon from "../VisibilityIcon";
 
 const MemoRelatedSettings = () => {
   const t = useTranslate();
@@ -13,6 +18,7 @@ const MemoRelatedSettings = () => {
     workspaceSettingStore.getWorkspaceSettingByKey(WorkspaceSettingKey.MEMO_RELATED)?.memoRelatedSetting || {},
   );
   const [memoRelatedSetting, setMemoRelatedSetting] = useState<WorkspaceMemoRelatedSetting>(originalSetting);
+  const [editingReaction, setEditingReaction] = useState<string>("");
 
   const updatePartialSetting = (partial: Partial<WorkspaceMemoRelatedSetting>) => {
     const newWorkspaceMemoRelatedSetting = WorkspaceMemoRelatedSetting.fromPartial({
@@ -22,11 +28,32 @@ const MemoRelatedSettings = () => {
     setMemoRelatedSetting(newWorkspaceMemoRelatedSetting);
   };
 
+  const upsertReaction = () => {
+    if (!editingReaction) {
+      return;
+    }
+
+    updatePartialSetting({ reactions: uniq([...memoRelatedSetting.reactions, editingReaction.trim()]) });
+    setEditingReaction("");
+  };
+
   const updateSetting = async () => {
-    await workspaceSettingStore.setWorkspaceSetting({
-      name: `${workspaceSettingNamePrefix}${WorkspaceSettingKey.MEMO_RELATED}`,
-      memoRelatedSetting,
-    });
+    if (memoRelatedSetting.reactions.length === 0) {
+      toast.error("Reactions must not be empty.");
+      return;
+    }
+
+    try {
+      await workspaceSettingStore.setWorkspaceSetting({
+        name: `${workspaceSettingNamePrefix}${WorkspaceSettingKey.MEMO_RELATED}`,
+        memoRelatedSetting,
+      });
+    } catch (error: any) {
+      toast.error(error.details);
+      console.error(error);
+      return;
+    }
+    toast.success(t("message.update-succeed"));
   };
 
   return (
@@ -61,6 +88,20 @@ const MemoRelatedSettings = () => {
         />
       </div>
       <div className="w-full flex flex-row justify-between items-center">
+        <span>Enable memo comments</span>
+        <Switch
+          checked={memoRelatedSetting.enableComment}
+          onChange={(event) => updatePartialSetting({ enableComment: event.target.checked })}
+        />
+      </div>
+      <div className="w-full flex flex-row justify-between items-center">
+        <span>Enable memo location</span>
+        <Switch
+          checked={memoRelatedSetting.enableLocation}
+          onChange={(event) => updatePartialSetting({ enableLocation: event.target.checked })}
+        />
+      </div>
+      <div className="w-full flex flex-row justify-between items-center">
         <span>{t("setting.system-section.enable-double-click-to-edit")}</span>
         <Switch
           checked={memoRelatedSetting.enableDoubleClickEdit}
@@ -75,6 +116,60 @@ const MemoRelatedSettings = () => {
           defaultValue={memoRelatedSetting.contentLengthLimit}
           onBlur={(event) => updatePartialSetting({ contentLengthLimit: Number(event.target.value) })}
         />
+      </div>
+      <div className="w-full flex flex-row justify-between items-center">
+        <span className="truncate">{t("setting.preference-section.default-memo-visibility")}</span>
+        <Select
+          className="!min-w-fit"
+          value={memoRelatedSetting.defaultVisibility}
+          startDecorator={<VisibilityIcon visibility={convertVisibilityFromString(memoRelatedSetting.defaultVisibility)} />}
+          onChange={(_, visibility) => {
+            updatePartialSetting({ defaultVisibility: visibility || Visibility.PRIVATE });
+          }}
+        >
+          {[Visibility.PRIVATE, Visibility.PROTECTED, Visibility.PUBLIC]
+            .map((v) => convertVisibilityToString(v))
+            .map((item) => (
+              <Option key={item} value={item} className="whitespace-nowrap">
+                {t(`memo.visibility.${item.toLowerCase() as Lowercase<typeof item>}`)}
+              </Option>
+            ))}
+        </Select>
+      </div>
+      <div className="w-full">
+        <span className="truncate">Reactions</span>
+        <div className="mt-2 w-full flex flex-row flex-wrap gap-1">
+          {memoRelatedSetting.reactions.map((reactionType) => {
+            return (
+              <Chip
+                className="!h-8"
+                key={reactionType}
+                variant="outlined"
+                size="lg"
+                endDecorator={
+                  <ChipDelete
+                    onDelete={() => updatePartialSetting({ reactions: memoRelatedSetting.reactions.filter((r) => r !== reactionType) })}
+                  />
+                }
+              >
+                {reactionType}
+              </Chip>
+            );
+          })}
+          <Input
+            className="w-32 !rounded-full !pl-3"
+            placeholder="Input"
+            size="sm"
+            value={editingReaction}
+            onChange={(event) => setEditingReaction(event.target.value.trim())}
+            endDecorator={
+              <CheckIcon
+                className="w-5 h-5 text-gray-500 dark:text-gray-400 cursor-pointer hover:text-teal-600"
+                onClick={() => upsertReaction()}
+              />
+            }
+          />
+        </div>
       </div>
       <div className="mt-2 w-full flex justify-end">
         <Button disabled={isEqual(memoRelatedSetting, originalSetting)} onClick={updateSetting}>
