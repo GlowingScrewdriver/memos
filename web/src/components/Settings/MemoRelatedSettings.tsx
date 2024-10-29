@@ -1,4 +1,5 @@
-import { Button, Input, Switch, Select, Option, Chip, ChipDelete } from "@mui/joy";
+import { Switch, Select, Option, Chip, ChipDelete } from "@mui/joy";
+import { Button, Input } from "@usememos/mui";
 import { isEqual, uniq } from "lodash-es";
 import { CheckIcon } from "lucide-react";
 import { useState } from "react";
@@ -109,6 +110,13 @@ const MemoRelatedSettings = () => {
         />
       </div>
       <div className="w-full flex flex-row justify-between items-center">
+        <span>{t("setting.system-section.disable-markdown-shortcuts-in-editor")}</span>
+        <Switch
+          checked={memoRelatedSetting.disableMarkdownShortcuts}
+          onChange={(event) => updatePartialSetting({ disableMarkdownShortcuts: event.target.checked })}
+        />
+      </div>
+      <div className="w-full flex flex-row justify-between items-center">
         <span>Content length limit(Byte)</span>
         <Input
           className="w-24"
@@ -172,7 +180,7 @@ const MemoRelatedSettings = () => {
         </div>
       </div>
       <div className="mt-2 w-full flex justify-end">
-        <Button disabled={isEqual(memoRelatedSetting, originalSetting)} onClick={updateSetting}>
+        <Button color="primary" disabled={isEqual(memoRelatedSetting, originalSetting)} onClick={updateSetting}>
           {t("common.save")}
         </Button>
       </div>

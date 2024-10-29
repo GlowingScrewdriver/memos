@@ -1,7 +1,8 @@
-import { Button, Select, Textarea, Option, Divider, Switch } from "@mui/joy";
+import { Select, Textarea, Option, Divider, Switch } from "@mui/joy";
+import { Button } from "@usememos/mui";
 import { isEqual } from "lodash-es";
 import { ExternalLinkIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { workspaceSettingNamePrefix, useWorkspaceSettingStore } from "@/store/v1";
@@ -18,16 +19,21 @@ const WorkspaceSection = () => {
   );
   const [workspaceGeneralSetting, setWorkspaceGeneralSetting] = useState<WorkspaceGeneralSetting>(originalSetting);
 
+  useEffect(() => {
+    setWorkspaceGeneralSetting(originalSetting);
+  }, [workspaceSettingStore.getWorkspaceSettingByKey(WorkspaceSettingKey.GENERAL)]);
+
   const handleUpdateCustomizedProfileButtonClick = () => {
     showUpdateCustomizedProfileDialog();
   };
 
   const updatePartialSetting = (partial: Partial<WorkspaceGeneralSetting>) => {
-    const newWorkspaceGeneralSetting = WorkspaceGeneralSetting.fromPartial({
-      ...workspaceGeneralSetting,
-      ...partial,
-    });
-    setWorkspaceGeneralSetting(newWorkspaceGeneralSetting);
+    setWorkspaceGeneralSetting(
+      WorkspaceGeneralSetting.fromPartial({
+        ...workspaceGeneralSetting,
+        ...partial,
+      }),
+    );
   };
 
   const handleSaveGeneralSetting = async () => {
@@ -52,7 +58,7 @@ const WorkspaceSection = () => {
           {t("setting.system-section.server-name")}:{" "}
           <span className="font-mono font-bold">{workspaceGeneralSetting.customProfile?.title || "Memos"}</span>
         </div>
-        <Button variant="outlined" color="neutral" onClick={handleUpdateCustomizedProfileButtonClick}>
+        <Button variant="outlined" onClick={handleUpdateCustomizedProfileButtonClick}>
           {t("common.edit")}
         </Button>
       </div>
@@ -142,7 +148,7 @@ const WorkspaceSection = () => {
         </Select>
       </div>
       <div className="mt-2 w-full flex justify-end">
-        <Button disabled={isEqual(workspaceGeneralSetting, originalSetting)} onClick={handleSaveGeneralSetting}>
+        <Button color="primary" disabled={isEqual(workspaceGeneralSetting, originalSetting)} onClick={handleSaveGeneralSetting}>
           {t("common.save")}
         </Button>
       </div>
