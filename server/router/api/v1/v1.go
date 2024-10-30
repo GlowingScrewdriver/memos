@@ -119,9 +119,10 @@ func (s *APIV1Service) RegisterGateway(ctx context.Context, echoServer *echo.Ech
 		grpcweb.WithOriginFunc(func(_ string) bool {
 			return true
 		}),
+		grpcweb.WithAllowNonRootResource(true),
 	}
 	wrappedGrpc := grpcweb.WrapServer(s.grpcServer, options...)
-	echoServer.Any("/memos.api.v1.*", echo.WrapHandler(wrappedGrpc))
+	echoServer.Any("/memos/memos.api.v1.*", echo.WrapHandler(wrappedGrpc))
 
 	return nil
 }

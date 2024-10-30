@@ -12,7 +12,7 @@ import { WorkspaceServiceDefinition } from "./types/proto/api/v1/workspace_servi
 import { WorkspaceSettingServiceDefinition } from "./types/proto/api/v1/workspace_setting_service";
 
 const channel = createChannel(
-  window.location.origin,
+  window.location.origin + '/memos',
   FetchTransport({
     credentials: "include",
   }),
