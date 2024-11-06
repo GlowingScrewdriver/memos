@@ -10,19 +10,29 @@ This fork attempts to allow Memos to run under a subpath of the server (e.g.
 `http://example.com/memos` instead of `http://example.com`. The motive behind this effort
 is to be able to run Memos behind a reverse proxy that dispatches based on path prefix.
 
-At present, this fork of Memos runs from `/memos`; API calls, however, are still made to
-`/memos.api.*`.
+At present, this fork of Memos serves the web app from the `/memos/` subpath of its server (i.e.
+at http://example.com/memos/ instead of http://example.com)
 
-### My Nginx reverse proxy configuration
-```
+### Future scope:
+* Expose the API endpoint for third-party apps (e.g. [MeoMemos](https://github.com/mudkipme/MoeMemos)) under
+  the custom subpath
+* Configurable subpath, rather than hardcoded
+
+### Known issues:
+* Sometimes, when visiting http://example.com/memos/, Memos fails to load, with the following error on the webpage:
+  ```
+  Unexpected Application Error!
+  r is undefined
+  ```
+  However, visiting http://example.com/memos/explore and then navigating from there works just fine.
+
+### Example Nginx reverse proxy configuration
+```nginx
 http {
     server {
         # Memos
         location /memos/ {
                 proxy_pass http://127.0.0.1:8085/memos/;
-        }
-        location ~ ^/memos\.api.+/ {
-                proxy_pass http://127.0.0.1:8085;
         }
     }
 }
