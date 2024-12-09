@@ -7,16 +7,42 @@ An open-source, self-hosted note-taking solution designed for seamless deploymen
 -------
 ## About this fork
 This fork attempts to allow Memos to run under a subpath of the server (e.g.
-`http://example.com/memos` instead of `http://example.com`. The motive behind this effort
-is to be able to run Memos behind a reverse proxy that dispatches based on path prefix.
+`http://example.com/memos` instead of `http://example.com`). The motive behind this effort
+is to be able to run Memos behind a reverse proxy that dispatches based on the HTTP path prefix
+rather than the domain name.
 
 At present, this fork of Memos serves the web app from the `/memos/` subpath of its server (i.e.
 at http://example.com/memos/ instead of http://example.com)
 
-### Future scope:
-* Expose the API endpoint for third-party apps (e.g. [MeoMemos](https://github.com/mudkipme/MoeMemos)) under
-  the custom subpath
-* Configurable subpath, rather than hardcoded
+### Reverse HTTP proxy configuration
+At the moment, this Memos fork serves the frontend at `/memos/`, while the API endpoints are unaltered
+(i.e. at `/memos.api.*/`). To put this behind a reverse proxy, the reverse proxy must catch requests to
+`/memos/` and `/memos.api.*` and forward them _unaltered_ to the memos server.
+
+The following examples assume Memos is listening on port 8081.
+
+#### Caddy example (this goes in your [Caddyfile](https://caddyserver.com/docs/caddyfile))
+```Caddyfile
+handle_path /memos/* {
+    reverse_proxy :8081
+}
+handle_path /memos.api*/* {
+    reverse_proxy :8081
+}
+```
+
+#### Nginx example (this goes in your [nginx.conf](https://nginx.org/en/docs/example.html))
+_Note: I do not use the Nginx setup anymore, although I once did. Use at your own risk._
+```nginx
+http {
+    server {
+        # Memos
+        location /memos/ {
+                proxy_pass http://127.0.0.1:8081/memos/;
+        }
+    }
+}
+```
 
 ### Known issues:
 * Sometimes, when visiting http://example.com/memos/, Memos fails to load, with the following error on the webpage:
@@ -26,68 +52,11 @@ at http://example.com/memos/ instead of http://example.com)
   ```
   However, visiting http://example.com/memos/explore and then navigating from there works just fine.
 
-### Example Nginx reverse proxy configuration
-```nginx
-http {
-    server {
-        # Memos
-        location /memos/ {
-                proxy_pass http://127.0.0.1:8085/memos/;
-        }
-    }
-}
-```
+### Future scope:
+* Expose the API endpoint for third-party apps (e.g. [MeoMemos](https://github.com/mudkipme/MoeMemos)) under
+  the custom subpath
+* Configurable subpath, rather than hardcoded
+
 ---------
 
-<a href="https://www.usememos.com">Home Page</a> •
-<a href="https://www.usememos.com/blog">Blogs</a> •
-<a href="https://www.usememos.com/docs">Docs</a> •
-<a href="https://demo.usememos.com/">Live Demo</a>
-
-<p>
-  <a href="https://hub.docker.com/r/neosmemo/memos"><img alt="Docker pull" src="https://img.shields.io/docker/pulls/neosmemo/memos.svg"/></a>
-  <a href="https://discord.gg/tfPJa4UmAv"><img alt="Discord" src="https://img.shields.io/badge/discord-chat-5865f2?logo=discord&logoColor=f5f5f5" /></a>
-</p>
-
-![demo](https://www.usememos.com/demo.png)
-
-## Main Features
-
-- **Privacy First** 🏠: Take control of your data. All runtime data is securely stored in your local database.
-- **Create at Speed** ✍️: Save content as plain text for quick access, with Markdown support for fast formatting and easy sharing.
-- **Lightweight but Powerful** 🤲: Built with Go, React.js, and a compact architecture, our application delivers powerful performance in a lightweight package.
-- **Customizable** 🧩: Easily customize your server name, icon, description, system style, and execution scripts to make it uniquely yours.
-- **Open Source** 🦦: Memos embraces the future of open source, with all code available on GitHub for transparency and collaboration.
-- **Free to Use** 💸: Enjoy all features completely free, with no charges ever for any content.
-
-## Deploy with Docker in seconds
-
-```bash
-docker run -d --name memos -p 5230:5230 -v ~/.memos/:/var/opt/memos neosmemo/memos:stable
-```
-
-> [!NOTE]
-> This command is only applicable for Unix/Linux systems. For Windows, please refer to the detailed [documentation](https://www.usememos.com/docs/install/container-install#docker-on-windows).
->
-> The `~/.memos/` directory will be used as the data directory on your local machine, while `/var/opt/memos` is the directory of the volume in Docker and should not be modified.
-
-Learn more about [other installation methods](https://www.usememos.com/docs/install).
-
-## Contribution
-
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. We greatly appreciate any contributions you make. Thank you for being a part of our community! 🥰
-
-## Sponsorship
-
-If you find Memos helpful, please consider sponsoring us. Your support will help us to continue developing and maintaining the project.
-
-❤️ Thanks to the following sponsors and backers: **[yourselfhosted](https://github.com/yourselfhosted)**, **[Burning_Wipf](https://github.com/KUKARAF)**, _[...see more](https://github.com/sponsors/usememos)_.
-
-## Star history
-
-[![Star History Chart](https://api.star-history.com/svg?repos=usememos/memos&type=Date)](https://star-history.com/#usememos/memos&Date)
-
-## Other Projects
-
-- [**Slash**](https://github.com/yourselfhosted/slash): An open source, self-hosted bookmarks and link sharing platform. Save and share your links very easily.
-- [**Gomark**](https://github.com/usememos/gomark): A markdown parser written in Go for Memos. And its [WebAssembly version](https://github.com/usememos/gomark-wasm) is also available.
+For more information about Memos that isn't specific to this fork, refer the [upstream's](https://github.com/usememos/memos) README. Enjoy!
