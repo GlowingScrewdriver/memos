@@ -35,7 +35,7 @@ func (*FrontendService) Serve(_ context.Context, e *echo.Echo) {
 	}
 
 	// Route to serve the assets folder without HTML5 fallback.
-	e.Group("memos/assets").Use(middleware.GzipWithConfig(middleware.GzipConfig{
+	e.Group("/assets").Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,
 	}), func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

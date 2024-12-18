@@ -106,7 +106,7 @@ func (s *APIV1Service) RegisterGateway(ctx context.Context, echoServer *echo.Ech
 	if err := v1pb.RegisterIdentityProviderServiceHandler(ctx, gwMux, conn); err != nil {
 		return err
 	}
-	gwGroup := echoServer.Group("/memos")
+	gwGroup := echoServer.Group("")
 	gwGroup.Use(middleware.CORS())
 	handler := echo.WrapHandler(gwMux)
 
@@ -119,10 +119,9 @@ func (s *APIV1Service) RegisterGateway(ctx context.Context, echoServer *echo.Ech
 		grpcweb.WithOriginFunc(func(_ string) bool {
 			return true
 		}),
-		grpcweb.WithAllowNonRootResource(true),
 	}
 	wrappedGrpc := grpcweb.WrapServer(s.grpcServer, options...)
-	echoServer.Any("/memos/memos.api.v1.*", echo.WrapHandler(wrappedGrpc))
+	echoServer.Any("/memos.api.v1.*", echo.WrapHandler(wrappedGrpc))
 
 	return nil
 }
