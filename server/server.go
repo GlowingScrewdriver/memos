@@ -50,6 +50,11 @@ func NewServer(ctx context.Context, profile *profile.Profile, store *store.Store
 	echoServer.Use(middleware.Recover())
 	s.echoServer = echoServer
 
+	// Handle reverse proxy
+	echoServer.Pre(middleware.Rewrite(map[string]string{
+		"/memos/*":             "/$1",
+	}))
+
 	workspaceBasicSetting, err := s.getOrUpsertWorkspaceBasicSetting(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get workspace basic setting")
