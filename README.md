@@ -6,27 +6,23 @@ An open-source, self-hosted note-taking solution designed for seamless deploymen
 
 -------
 ## About this fork
-This fork attempts to allow Memos to run under a subpath of the server (e.g.
-`http://example.com/memos` instead of `http://example.com`). The motive behind this effort
-is to be able to run Memos behind a reverse proxy that dispatches based on the HTTP path prefix
-rather than the domain name.
+This fork attempts to allow Memos to run under a subpath of the host server. The motive
+behind this effort is to be able to run Memos behind a reverse proxy that multiplexes
+based on the HTTP path prefix rather than the domain name.
 
-At present, this fork of Memos serves the web app from the `/memos/` subpath of its server (i.e.
-at http://example.com/memos/ instead of http://example.com)
+At present, this fork of Memos serves the frontend and the API endpoints under the `/memos/`
+subpath of its server (i.e. at http://example.com/memos/ instead of http://example.com/).
+
 
 ### Reverse HTTP proxy configuration
-At the moment, this Memos fork serves the frontend at `/memos/`, while the API endpoints are unaltered
-(i.e. at `/memos.api.*/`). To put this behind a reverse proxy, the reverse proxy must catch requests to
-`/memos/` and `/memos.api.*` and forward them _unaltered_ to the memos server.
+The reverse proxy must be configured to catch requests to `/memos/` and forward
+them _unaltered_ to the memos server.
 
 The following examples assume Memos is listening on port 8081.
 
 #### Caddy example (this goes in your [Caddyfile](https://caddyserver.com/docs/caddyfile))
 ```Caddyfile
-handle_path /memos/* {
-    reverse_proxy :8081
-}
-handle_path /memos.api*/* {
+handle /memos/* {
     reverse_proxy :8081
 }
 ```
@@ -45,7 +41,8 @@ http {
 ```
 
 ### Known issues:
-* Sometimes, when visiting http://example.com/memos/, Memos fails to load, with the following error on the webpage:
+* Sometimes, when visiting http://example.com/memos/, Memos fails to load, with the following error
+(or similar) on the webpage:
   ```
   Unexpected Application Error!
   r is undefined
@@ -53,8 +50,6 @@ http {
   However, visiting http://example.com/memos/explore and then navigating from there works just fine.
 
 ### Future scope:
-* Expose the API endpoint for third-party apps (e.g. [MeoMemos](https://github.com/mudkipme/MoeMemos)) under
-  the custom subpath
 * Configurable subpath, rather than hardcoded
 
 ---------
