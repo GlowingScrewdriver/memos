@@ -6,6 +6,7 @@ on:
       # Match stable and rc versions, such as 'v1.0.0' or 'v0.23.0-rc.0'
       - "v*.*.*"
       - "v*.*.*-rc.*"
+  workflow_dispatch:
 
 jobs:
   build-and-push-stable-image:
